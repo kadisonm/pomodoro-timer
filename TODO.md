@@ -1,0 +1,2 @@
+- Figure out how to add sound
+- Add timer screens

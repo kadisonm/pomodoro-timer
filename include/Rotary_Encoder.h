@@ -8,5 +8,6 @@ extern int rotCounter;
 
 void initRotEncoder();
 void updateRotEncoder();
+boolean isButtonDown();
 
 #endif

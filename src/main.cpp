@@ -73,7 +73,7 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(ROT_KEY) == LOW) {
+  if (isButtonDown()) {
     timerStarted = !timerStarted;
 
     if (timerStarted) {

@@ -9,6 +9,9 @@ int lastS2State;
 int ROT_KEY = 5; 
 int rotCounter = 0;
 
+const unsigned long dbDelay = 50;
+unsigned long lastDb = 0;
+
 void initRotEncoder() {
     pinMode(ROT_KEY, INPUT_PULLUP);
     pinMode(ROT_S1, INPUT);
@@ -30,4 +33,15 @@ void updateRotEncoder() {
     } 
 
     lastS2State = s2State;
+}
+
+boolean isButtonDown() {
+    int reading = digitalRead(ROT_KEY);
+
+    if (reading == LOW && (millis() - lastDb) > dbDelay) {
+        lastDb = millis();
+        return true;
+    }
+
+    return false;
 }

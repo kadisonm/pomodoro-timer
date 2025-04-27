@@ -18,6 +18,8 @@ struct TextProperties {
 };
 
 void initTFT();
+void setBackground(uint16_t color);
 void drawText(const char* text, const TextProperties properties);
+void clearText(const char* text, const TextProperties properties);
 
 #endif

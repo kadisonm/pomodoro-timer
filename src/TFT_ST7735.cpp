@@ -1,5 +1,7 @@
 #include "TFT_ST7735.h"
 
+// SCK = 13 and SDA == 11 (built in)
+
 // TFT PINS:
 // LED (CONNECT TO 3.3V)
 // SCK
@@ -18,16 +20,21 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_AO, TFT_RESET);
 
 int16_t tftWidth = tft.height();
 int16_t tftHeight = tft.width();
+uint16_t currentBackgroundColor = ST7735_BLACK;
 
 void initTFT() {
     tft.initR(INITR_BLACKTAB);
     tft.setRotation(3);
 }
 
+void setBackground(uint16_t color) {
+    currentBackgroundColor = color;
+    tft.fillScreen(color);
+}
+
 void drawText(const char* text, TextProperties properties) {
     int16_t cursorX = properties.x;
     int16_t cursorY = properties.y;
-
     
     tft.setTextWrap(properties.textWrap);
     tft.setTextColor(properties.color);
@@ -52,5 +59,11 @@ void drawText(const char* text, TextProperties properties) {
 
     tft.setCursor(cursorX, cursorY);
     tft.print(text);
+}
+
+void clearText(const char* text, TextProperties properties) {
+    properties.color = currentBackgroundColor;
+
+    drawText(text, properties);
 }
 

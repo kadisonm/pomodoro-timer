@@ -1,6 +1,4 @@
 #include <Arduino.h>
-#include <Adafruit_ST7735.h>
-#include <SPI.h>
 
 #include <TFT_ST7735.h>
 
@@ -18,6 +16,8 @@ int lastCounter = 0;
 int s2State;
 int lastS2State;
 
+TextProperties title;
+TextProperties subtitle;
 
 void updateRotEncoder() {
   s2State = digitalRead(ROT_S2);
@@ -44,25 +44,19 @@ void playNote(int freq, int dur) {
 int pomodoroLength = 15;
 int breakLength = 15;
 
-TextProperties title;
-title.color = ST7735_BLACK;
-
-
-
 void drawPomodoroMenu() {
   tft.fillScreen(ST7735_BLACK);
 
-  tft.setTextColor(ST7735_WHITE);
-  tft.setTextSize(2);
+  drawText("Pomodoro", title);
 
-  drawText("Pomodoro", TextProperties{2});
-  tft.setTextSize(1.7);
-  tft.println("Click to start/stop timer");
-  tft.println();
-  tft.setTextSize(10);
-  tft.println(pomodoroLength);
+  title.y = 40;
+  title.horizontalAnchor = "left";
+  drawText("Pomodoro", title);
 
-  
+  title.y = 80;
+  title.horizontalAnchor = "right";
+  drawText("Pomodoro", title);
+  //drawText("Click to start/stop timer", subtitle);
 }
 
 void drawBreakMenu() {
@@ -79,6 +73,18 @@ void drawBreakMenu() {
 void setup() {
   Serial.begin(9600);
 
+  // Set up text types
+  title.x = tftWidth / 2;
+  title.y = 0;
+  title.size = 2.2;
+  title.horizontalAnchor = "center";
+  title.verticalAnchor = "bottom";
+
+  subtitle.x = tftHeight / 2;
+  subtitle.y = 2;
+  subtitle.size = 1.7;
+  subtitle.horizontalAnchor = "center";
+
   pinMode(ROT_KEY, INPUT_PULLUP);
   pinMode(ROT_S1, INPUT);
   pinMode(ROT_S2, INPUT);
@@ -87,8 +93,7 @@ void setup() {
 
   attachInterrupt(digitalPinToInterrupt(ROT_S1), updateRotEncoder, CHANGE);
 
-  tft.initR(INITR_BLACKTAB);
-  tft.setRotation(3);
+  initTFT();
 
   drawPomodoroMenu();
 }

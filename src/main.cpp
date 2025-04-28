@@ -57,20 +57,20 @@ void drawBreakMenu() {
   drawText("Click to start/stop timer", subtitle);
 }
 
-void changeState(String newState) {
-  state = newState;
-  timerStarted = false;
+// void changeState(String newState) {
+//   state = newState;
+//   timerStarted = false;
 
-  setBackground(ST7735_BLACK);
+//   setBackground(ST7735_BLACK);
   
-  if (newState == "Pomodoro") {
-    drawPomodoroMenu();
-    timer = pomodoroLength * 60000;
-  } else {
-    drawBreakMenu();
-    timer = breakLength * 60000;
-  }
-}
+//   if (newState == "Pomodoro") {
+//     drawPomodoroMenu();
+//     timer = pomodoroLength * 60000;
+//   } else {
+//     drawBreakMenu();
+//     timer = breakLength * 60000;
+//   }
+// }
 
 void setup() {
   Serial.begin(9600);
@@ -98,46 +98,49 @@ void setup() {
 
   setBackground(ST7735_BLACK);
 
-  changeState("pomodoro");
+  setBackground(ST7735_RED);
+  drawPomodoroMenu();
+
+  //changeState("pomodoro");
 }
 
 void rotEncoderPulsed(int direction) {
-  Serial.print(direction);
-  if (!timerStarted) {
-    if (state == "pomodoro") {
-      breakLength += direction;
-      timer = pomodoroLength * 60000;
-    } else {
-      breakLength += direction;
-      timer = breakLength * 60000;
-    }
-  }
+  // Serial.print(direction);
+  // if (!timerStarted) {
+  //   if (state == "pomodoro") {
+  //     breakLength += direction;
+  //     timer = pomodoroLength * 60000;
+  //   } else {
+  //     breakLength += direction;
+  //     timer = breakLength * 60000;
+  //   }
+  // }
 }
 
 void loop() {
-  if (isButtonDown() && millis() - debounce > 5000) {
-    debounce = millis();
-    timerStarted = !timerStarted;
+  // if (isButtonDown() && millis() - debounce > 5000) {
+  //   debounce = millis();
+  //   timerStarted = !timerStarted;
 
-    if (timerStarted) {
-      startTime = millis();
+  //   if (timerStarted) {
+  //     startTime = millis();
 
-      if (state == "pomodoro") {
-        setBackground(ST7735_RED);
-        drawPomodoroMenu();
-      } else {
-        setBackground(ST7735_GREEN);
-        drawBreakMenu();
-      }
-    }
-  }
+  //     if (state == "pomodoro") {
+  //       setBackground(ST7735_RED);
+  //       drawPomodoroMenu();
+  //     } else {
+  //       setBackground(ST7735_GREEN);
+  //       drawBreakMenu();
+  //     }
+  //   }
+  // }
 
-  clearText(String(timer / 60000).c_str(), time);
+  // clearText(String(timer / 60000).c_str(), time);
 
-  if (timerStarted) {
-    startTime += millis();
-    timer -= startTime;
-  }
+  // if (timerStarted) {
+  //   startTime += millis();
+  //   timer -= startTime;
+  // }
 
-  drawText(String(timer / 60000).c_str(), time);
+  // drawText(String(timer / 60000).c_str(), time);
 }

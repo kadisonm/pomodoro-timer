@@ -11,6 +11,7 @@ class Custom_Timer {
         Custom_Timer(unsigned long x);
         void Play();
         String GetFormattedTime();
+        void IncreaseLength(int direction);
         void Update();
         void Pause();
         void Reset();

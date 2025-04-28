@@ -5,10 +5,10 @@
 #include <Buzzer.h>
 #include <Custom_Timer.h>
 
-Custom_Timer pomodoroTimer = Custom_Timer(15 * 60000);
-Custom_Timer breakTimer = Custom_Timer(5 * 60000);
+Custom_Timer pomodoroTimer = Custom_Timer(.2 * 60000);
+Custom_Timer breakTimer = Custom_Timer(.1 * 60000);
 
-// State management
+unsigned long lastUpdate = millis();
 
 enum State {
   Pomodoro,
@@ -17,61 +17,21 @@ enum State {
 
 State currentState;
 
-void changeState(State newState);
-
-void PomodoroStart() {
-  setBackground(ST7735_BLACK);
-  drawText("Pomodoro", title);
-  drawText("Click to start/stop timer", subtitle);
-  pomodoroTimer.Reset();
-}
-
-void PomodoroLoop() {
-  if (isButtonDown()) {
-    if (!pomodoroTimer.running) {
-      setBackground(ST7735_RED);
-      drawText("Pomodoro", title);
-      drawText("Click to start/stop timer", subtitle);
-      pomodoroTimer.Start();
-    } else {
-      pomodoroTimer.Reset();
-    }
-  }
-
-  if (pomodoroTimer.running) {
-    clearArea(0, 60, tftWidth, tftHeight);
-    drawText(pomodoroTimer.GetFormattedTime().c_str(), time);
-
-    if (pomodoroTimer.GetTime() <= 0) {
-      changeState(Break);
-    }
-  }
-}
-
-void BreakStart() {
-  setBackground(ST7735_BLACK);
-  drawText("Break", title);
-  drawText("Click to start/stop timer", subtitle);
-}
-
-void BreakLoop() {
-  if (isButtonDown()) {
-    changeState(Pomodoro);
-  }
-}
-
 void changeState(State newState) {
   currentState = newState;
 
-  switch (currentState)
-  {
-    case Pomodoro:
-      PomodoroStart();
-      break;
-    
-    case Break:
-      BreakStart();
-      break;
+  if (currentState == Pomodoro) {
+    setBackground(0x602805);
+    drawText("Pomodoro", title);
+    drawText("Click to start timer", subtitle);
+    pomodoroTimer.Reset();
+    drawText(pomodoroTimer.GetFormattedTime().c_str(), time);
+  } else {
+    setBackground(0x223D4F);
+    drawText("Break", title);
+    drawText("Click to start timer", subtitle);
+    breakTimer.Reset();
+    drawText(breakTimer.GetFormattedTime().c_str(), time);
   }
 }
 
@@ -84,20 +44,67 @@ void setup() {
   initRotEncoder();
   initBuzzer();
 
-  setBackground(ST7735_BLACK);
-
   changeState(Pomodoro);
 }
 
 void loop() {
-  switch (currentState)
-  {
-    case Pomodoro:
-      PomodoroLoop();
-      break;
-    
-    case Break:
-      BreakLoop();
-      break;
+  if (isButtonDown()) {
+    if (currentState == Pomodoro) {
+      if (pomodoroTimer.paused) {
+        setBackground(0xC55C5C);
+        drawText("Pomodoro", title);
+        drawText("Click to pause timer", subtitle);
+        drawText(pomodoroTimer.GetFormattedTime().c_str(), time);
+        pomodoroTimer.Play();
+      } else {
+        pomodoroTimer.Pause();
+        setBackground(0x602805);
+        drawText("Pomodoro", title);
+        drawText("Click to play timer", subtitle);
+        drawText(pomodoroTimer.GetFormattedTime().c_str(), time);
+      }  
+    } else {
+      if (breakTimer.paused) {
+        setBackground(0x2E5F7F);
+        drawText("Break", title);
+        drawText("Click to pause timer", subtitle);
+        drawText(breakTimer.GetFormattedTime().c_str(), time);
+        breakTimer.Play();
+      } else {
+        breakTimer.Pause();
+        setBackground(0x223D4F);
+        drawText("Break", title);
+        drawText("Click to play timer", subtitle);
+        drawText(breakTimer.GetFormattedTime().c_str(), time);
+      }  
+    }
+  }
+  
+  if (millis() - lastUpdate >= 1000) {
+    lastUpdate = millis();
+    pomodoroTimer.Update();
+    breakTimer.Update();
+
+    if (currentState == Pomodoro) {
+      if (!pomodoroTimer.paused) {
+        if (pomodoroTimer.time <= 0) {
+          changeState(Break);
+          return;
+        }
+
+        clearText(previousText.c_str(), time);
+        drawText(pomodoroTimer.GetFormattedTime().c_str(), time);  
+      }
+    } else {
+      if (!breakTimer.paused) {
+        if (breakTimer.time <= 0) {
+          changeState(Pomodoro);
+          return;
+        }
+
+        clearText(previousText.c_str(), time);
+        drawText(breakTimer.GetFormattedTime().c_str(), time);
+      }
+    }
   }
 }

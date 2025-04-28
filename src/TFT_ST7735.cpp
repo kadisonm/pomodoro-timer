@@ -26,25 +26,28 @@ TextProperties title;
 TextProperties subtitle;
 TextProperties time;
 
+String previousText;
+
 void initTFT() {
     tft.initR(INITR_BLACKTAB);
     tft.setRotation(3);
 
     title.x = tftWidth / 2;
-    title.y = 0;
+    title.y = 5;
     title.size = 2;
     title.horizontalAnchor = "center";
 
     subtitle.x = tftWidth / 2;
-    subtitle.y = 20;
+    subtitle.y = tftHeight - 5;
     subtitle.size = 1.7;
     subtitle.horizontalAnchor = "center";
+    subtitle.verticalAnchor = "bottom";
 
     time.x = tftWidth / 2;
-    time.y = tftHeight - 10;
-    time.size = 5;
+    time.y = tftHeight / 2;
+    time.size = 4.9;
     time.horizontalAnchor = "center";
-    time.verticalAnchor = "bottom";
+    time.verticalAnchor = "center";
 }
 
 void setBackground(uint16_t color) {
@@ -79,6 +82,7 @@ void drawText(const char* text, TextProperties properties) {
 
     tft.setCursor(cursorX, cursorY);
     tft.print(text);
+    previousText = text;
 }
 
 void clearText(const char* text, TextProperties properties) {
@@ -87,7 +91,7 @@ void clearText(const char* text, TextProperties properties) {
     drawText(text, properties);
 }
 
-void clearArea(int x, int y, int w, int h) {
+void clearArea(uint8_t x, uint8_t y, uint8_t w, uint8_t h)
+{
     tft.fillRect(x, y, w, h, currentBackgroundColor);
 }
-

@@ -7,6 +7,8 @@ extern Adafruit_ST7735 tft;
 extern int16_t tftWidth;
 extern int16_t tftHeight;
 
+extern String previousText;
+
 struct TextProperties {
     uint8_t x = 0;
     uint8_t y = 0;

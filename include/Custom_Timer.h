@@ -3,17 +3,16 @@
 
 #include <Arduino.h>
 
-class Custom_Timer {
-    private: 
-        float time;
-        float startTime;
+class Custom_Timer {    
     public:
-        float length;
-        bool running;
-        Custom_Timer(float x);
-        void Start();
-        float GetTime();
+        unsigned long time; 
+        unsigned long length;
+        bool paused;
+        Custom_Timer(unsigned long x);
+        void Play();
         String GetFormattedTime();
+        void Update();
+        void Pause();
         void Reset();
 };
 

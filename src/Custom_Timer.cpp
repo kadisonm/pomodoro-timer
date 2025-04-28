@@ -1,41 +1,35 @@
 #include <Arduino.h>
 #include <Custom_Timer.h>
 
-class Custom_Timer {
-    private: 
-        float time;
-        float startTime;
-    public:
-        float length;
-        bool running;
+Custom_Timer::Custom_Timer(unsigned long x) {
+    length = x;
+    Reset();
+}
 
-        Custom_Timer(float x) {
-            length = x;
-            Reset();
-        }
+void Custom_Timer::Play() {
+    paused = false;
+}
 
-        void Start() {
-            startTime = millis();
-            time = length;
-            running = true;
-        }
+String Custom_Timer::GetFormattedTime() {
+    const float totalSeconds = time / 1000;
+    int minutes = (int) totalSeconds / 60;
+    int seconds = (int) totalSeconds % 60;
+    
+    String timeString = (minutes < 10 ? "0" + String(minutes) : String(minutes)) + ":" + (seconds < 10 ? "0" + String(seconds) : String(seconds));
+    return timeString;
+}
 
-        float GetTime() {
-            time = length - startTime;
-        }
+void Custom_Timer::Update() {
+    if (!paused && time > 0) {
+        time -= 1000;
+    }
+}
 
-        String GetFormattedTime() {
-            const float totalSeconds = GetTime() / 1000;
-            int minutes = (int) totalSeconds / 60;
-            int seconds = (int) totalSeconds % 60;
-            
-            String timeString = String(minutes) + ":" + (seconds < 10 ? "0" + String(seconds) : String(seconds));
-            return timeString;
-        }
+void Custom_Timer::Pause() {
+    paused = true;
+}
 
-        void Reset() {
-            time = length;
-            startTime = 0;
-            running = false;
-        }
-};
+void Custom_Timer::Reset() {
+    time = length;
+    paused = true;
+}

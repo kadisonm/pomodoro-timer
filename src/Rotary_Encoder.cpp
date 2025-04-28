@@ -27,8 +27,10 @@ void updateRotEncoder() {
         // Anti-clockwise
         if (digitalRead(ROT_S1) == HIGH) { 
             rotCounter++;
+            rotEncoderPulsed(1);
         } else {
             rotCounter--;
+            rotEncoderPulsed(-1);
         }
     } 
 

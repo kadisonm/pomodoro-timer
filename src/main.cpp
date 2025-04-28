@@ -3,40 +3,73 @@
 #include <TFT_ST7735.h>
 #include <Rotary_Encoder.h>
 #include <Buzzer.h>
+#include <State.h>
 
 TextProperties title;
 TextProperties subtitle;
 TextProperties time;
-
-String menu = "pomodoro";
 
 boolean timerStarted = false;
 
 int pomodoroLength = 15;
 int breakLength = 5;
 
-void showPomodoroMenu() {
+unsigned long timer = 0;
+unsigned long startTime = 0;
+
+unsigned long debounce = 0;
+
+class PomodoroScreen : public State {
+  public:
+    void start() {
+
+    }
+
+    void update() {
+
+    }
+};
+
+
+class BreakScreen : public State {
+  public:
+    void start() {
+
+    }
+
+    void update() {
+
+    }
+};
+
+PomodoroScreen pomodoroState = PomodoroScreen();
+BreakScreen breakState = BreakScreen();
+
+State state = pomodoroState;
+
+void drawPomodoroMenu() {
+  drawText("Pomodoro", title);
+  drawText("Click to start/stop timer", subtitle);
+}
+
+void drawBreakMenu() {
+  drawText("Break", title);
+  drawText("Click to start/stop timer", subtitle);
+}
+
+void changeState(String newState) {
+  state = newState;
+  timerStarted = false;
+
   setBackground(ST7735_BLACK);
-  drawText("Pomodoro", title);
-  drawText("Click to start/stop timer", subtitle);
-}
-
-void showPomodoroTimer() {
-  drawText("Pomodoro", title);
-  drawText("Click to start/stop timer", subtitle);
-  drawText(String(pomodoroLength).c_str(), time);
-}
-
-void showBreakMenu() {
-  setBackground(ST7735_BLACK);
-  drawText("Pomodoro", title);
-  drawText("Click to start/stop timer", subtitle);
-}
-
-void showBreakTimer() {
-  drawText("Pomodoro", title);
-  drawText("Click to start/stop timer", subtitle);
-  drawText(String(breakLength).c_str(), time);
+  
+  if (newState == "Pomodoro") {
+    drawPomodoroMenu();
+    timer = pomodoroLength * 60000;
+  } else {
+    drawBreakMenu();
+    timer = breakLength * 60000;
+  }
 }
 
 void setup() {
@@ -65,39 +98,46 @@ void setup() {
 
   setBackground(ST7735_BLACK);
 
-  if (menu == "pomodoro") {
-    showPomodoroMenu();
-  } else {
-    showBreakMenu();
+  changeState("pomodoro");
+}
+
+void rotEncoderPulsed(int direction) {
+  Serial.print(direction);
+  if (!timerStarted) {
+    if (state == "pomodoro") {
+      breakLength += direction;
+      timer = pomodoroLength * 60000;
+    } else {
+      breakLength += direction;
+      timer = breakLength * 60000;
+    }
   }
 }
 
 void loop() {
-  if (isButtonDown()) {
+  if (isButtonDown() && millis() - debounce > 5000) {
+    debounce = millis();
     timerStarted = !timerStarted;
 
     if (timerStarted) {
-      if (menu == "pomodoro") {
+      startTime = millis();
+
+      if (state == "pomodoro") {
         setBackground(ST7735_RED);
+        drawPomodoroMenu();
       } else {
         setBackground(ST7735_GREEN);
-      }
-    } else {
-      setBackground(ST7735_BLACK);
-
-      if (menu == "pomodoro") {
-        showPomodoroMenu();
-      } else {
-        showBreakMenu();
+        drawBreakMenu();
       }
     }
   }
+
+  clearText(String(timer / 60000).c_str(), time);
 
   if (timerStarted) {
-    if (menu == "pomodoro") {
-      showPomodoroTimer();
-    } else {
-      showBreakTimer();
-    }
+    startTime += millis();
+    timer -= startTime;
   }
+
+  drawText(String(timer / 60000).c_str(), time);
 }

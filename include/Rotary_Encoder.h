@@ -1,5 +1,5 @@
-#ifndef RotaryEncoder
-#define RotaryEncoder
+#ifndef RotaryEncoder_h
+#define RotaryEncoder_h
 
 #include <Arduino.h>
 
@@ -9,6 +9,5 @@ extern int rotCounter;
 void initRotEncoder();
 void updateRotEncoder();
 boolean isButtonDown();
-void rotEncoderPulsed(int direction);
 
 #endif

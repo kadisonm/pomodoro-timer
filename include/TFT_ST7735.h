@@ -1,5 +1,5 @@
-#ifndef TFT
-#define TFT
+#ifndef TFT_h
+#define TFT_h
 
 #include <Adafruit_ST7735.h>
 
@@ -17,9 +17,14 @@ struct TextProperties {
     boolean textWrap = false;
 };
 
+extern TextProperties title;
+extern TextProperties subtitle;
+extern TextProperties time;
+
 void initTFT();
 void setBackground(uint16_t color);
 void drawText(const char* text, const TextProperties properties);
 void clearText(const char* text, const TextProperties properties);
+void clearArea(uint8_t x, uint8_t y, uint8_t w, uint8_t h);
 
 #endif

@@ -3,94 +3,82 @@
 #include <TFT_ST7735.h>
 #include <Rotary_Encoder.h>
 #include <Buzzer.h>
-#include <State.h>
+#include <Custom_Timer.h>
 
-TextProperties title;
-TextProperties subtitle;
-TextProperties time;
+Custom_Timer pomodoroTimer = Custom_Timer(15 * 60000);
+Custom_Timer breakTimer = Custom_Timer(5 * 60000);
 
-boolean timerStarted = false;
+// State management
 
-int pomodoroLength = 15;
-int breakLength = 5;
-
-unsigned long timer = 0;
-unsigned long startTime = 0;
-
-unsigned long debounce = 0;
-
-class PomodoroScreen : public State {
-  public:
-    void start() {
-
-    }
-
-    void update() {
-
-    }
+enum State {
+  Pomodoro,
+  Break,
 };
 
+State currentState;
 
-class BreakScreen : public State {
-  public:
-    void start() {
+void changeState(State newState);
 
-    }
-
-    void update() {
-
-    }
-};
-
-PomodoroScreen pomodoroState = PomodoroScreen();
-BreakScreen breakState = BreakScreen();
-
-State state = pomodoroState;
-
-void drawPomodoroMenu() {
+void PomodoroStart() {
+  setBackground(ST7735_BLACK);
   drawText("Pomodoro", title);
   drawText("Click to start/stop timer", subtitle);
+  pomodoroTimer.Reset();
 }
 
-void drawBreakMenu() {
+void PomodoroLoop() {
+  if (isButtonDown()) {
+    if (!pomodoroTimer.running) {
+      setBackground(ST7735_RED);
+      drawText("Pomodoro", title);
+      drawText("Click to start/stop timer", subtitle);
+      pomodoroTimer.Start();
+    } else {
+      pomodoroTimer.Reset();
+    }
+  }
+
+  if (pomodoroTimer.running) {
+    clearArea(0, 60, tftWidth, tftHeight);
+    drawText(pomodoroTimer.GetFormattedTime().c_str(), time);
+
+    if (pomodoroTimer.GetTime() <= 0) {
+      changeState(Break);
+    }
+  }
+}
+
+void BreakStart() {
+  setBackground(ST7735_BLACK);
   drawText("Break", title);
   drawText("Click to start/stop timer", subtitle);
 }
 
-// void changeState(String newState) {
-//   state = newState;
-//   timerStarted = false;
+void BreakLoop() {
+  if (isButtonDown()) {
+    changeState(Pomodoro);
+  }
+}
 
-//   setBackground(ST7735_BLACK);
-  
-//   if (newState == "Pomodoro") {
-//     drawPomodoroMenu();
-//     timer = pomodoroLength * 60000;
-//   } else {
-//     drawBreakMenu();
-//     timer = breakLength * 60000;
-//   }
-// }
+void changeState(State newState) {
+  currentState = newState;
+
+  switch (currentState)
+  {
+    case Pomodoro:
+      PomodoroStart();
+      break;
+    
+    case Break:
+      BreakStart();
+      break;
+  }
+}
+
+// Arduino
 
 void setup() {
   Serial.begin(9600);
-
-  // Set up text types
-  title.x = tftWidth / 2;
-  title.y = 0;
-  title.size = 2;
-  title.horizontalAnchor = "center";
-
-  subtitle.x = tftWidth / 2;
-  subtitle.y = 20;
-  subtitle.size = 1.7;
-  subtitle.horizontalAnchor = "center";
-
-  time.x = tftWidth / 2;
-  time.y = tftHeight - 10;
-  time.size = 5;
-  time.horizontalAnchor = "center";
-  time.verticalAnchor = "bottom";
 
   initTFT();
   initRotEncoder();
@@ -98,49 +86,18 @@ void setup() {
 
   setBackground(ST7735_BLACK);
 
-  setBackground(ST7735_RED);
-  drawPomodoroMenu();
-
-  //changeState("pomodoro");
-}
-
-void rotEncoderPulsed(int direction) {
-  // Serial.print(direction);
-  // if (!timerStarted) {
-  //   if (state == "pomodoro") {
-  //     breakLength += direction;
-  //     timer = pomodoroLength * 60000;
-  //   } else {
-  //     breakLength += direction;
-  //     timer = breakLength * 60000;
-  //   }
-  // }
+  changeState(Pomodoro);
 }
 
 void loop() {
-  // if (isButtonDown() && millis() - debounce > 5000) {
-  //   debounce = millis();
-  //   timerStarted = !timerStarted;
-
-  //   if (timerStarted) {
-  //     startTime = millis();
-
-  //     if (state == "pomodoro") {
-  //       setBackground(ST7735_RED);
-  //       drawPomodoroMenu();
-  //     } else {
-  //       setBackground(ST7735_GREEN);
-  //       drawBreakMenu();
-  //     }
-  //   }
-  // }
-
-  // clearText(String(timer / 60000).c_str(), time);
-
-  // if (timerStarted) {
-  //   startTime += millis();
-  //   timer -= startTime;
-  // }
-
-  // drawText(String(timer / 60000).c_str(), time);
+  switch (currentState)
+  {
+    case Pomodoro:
+      PomodoroLoop();
+      break;
+    
+    case Break:
+      BreakLoop();
+      break;
+  }
 }

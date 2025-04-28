@@ -22,9 +22,29 @@ int16_t tftWidth = tft.height();
 int16_t tftHeight = tft.width();
 uint16_t currentBackgroundColor = ST7735_BLACK;
 
+TextProperties title;
+TextProperties subtitle;
+TextProperties time;
+
 void initTFT() {
     tft.initR(INITR_BLACKTAB);
     tft.setRotation(3);
+
+    title.x = tftWidth / 2;
+    title.y = 0;
+    title.size = 2;
+    title.horizontalAnchor = "center";
+
+    subtitle.x = tftWidth / 2;
+    subtitle.y = 20;
+    subtitle.size = 1.7;
+    subtitle.horizontalAnchor = "center";
+
+    time.x = tftWidth / 2;
+    time.y = tftHeight - 10;
+    time.size = 5;
+    time.horizontalAnchor = "center";
+    time.verticalAnchor = "bottom";
 }
 
 void setBackground(uint16_t color) {
@@ -65,5 +85,9 @@ void clearText(const char* text, TextProperties properties) {
     properties.color = currentBackgroundColor;
 
     drawText(text, properties);
+}
+
+void clearArea(int x, int y, int w, int h) {
+    tft.fillRect(x, y, w, h, currentBackgroundColor);
 }
 

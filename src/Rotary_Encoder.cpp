@@ -9,7 +9,7 @@ int lastS2State;
 int ROT_KEY = 5; 
 int rotCounter = 0;
 
-const unsigned long dbDelay = 50;
+const unsigned long dbDelay = 500;
 unsigned long lastDb = 0;
 
 void initRotEncoder() {
@@ -27,10 +27,8 @@ void updateRotEncoder() {
         // Anti-clockwise
         if (digitalRead(ROT_S1) == HIGH) { 
             rotCounter++;
-            rotEncoderPulsed(1);
         } else {
             rotCounter--;
-            rotEncoderPulsed(-1);
         }
     } 
 
